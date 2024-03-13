@@ -4,7 +4,9 @@
   "description": "multiplayer game client using phaser and colyseus",
   "scripts": {
     "start": "parcel serve index.html --host 0.0.0.0",
+    "prebuild": "rimraf dist",
     "build": "parcel build index.html",
+    "serve": "serve dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Cole Morrison",
@@ -13,6 +15,8 @@
     "@types/node": "^20.11.25",
     "parcel": "^2.4.0",
     "process": "^0.11.10",
+    "rimraf": "^5.0.5",
+    "serve": "^14.2.1",
     "typescript": "^4.6.3"
   },
   "dependencies": {
