@@ -23,6 +23,9 @@ jobs:
 
     - name: Build project
       run: npm run build
+      env:
+        SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        SERVER_PORT: ${{ secrets.SERVER_PORT }}
 
     - name: Create Release
       id: create_release
