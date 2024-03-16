@@ -100,43 +100,54 @@ export class GameScene extends Phaser.Scene {
     async connect() {
         // add connection status text
         const connectionStatusText = this.add
-            .text(0, 0, "Trying to connect with the server...")
-            .setStyle({ color: "#ff0000" })
+            .text(0, 0, "Connecting with server...")
+            .setStyle({ color: "#AAAAAA" })
             .setPadding(4)
 
         const client = new Client(BACKEND_URL);
+        const maxRetries = 5;
 
-        try {
-            this.room = await client.joinOrCreate("game_room", {});
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                this.room = await client.joinOrCreate("game_room", {});
 
-            // connection successful!
-            connectionStatusText.destroy();
+                // connection successful!
+                connectionStatusText.destroy();
 
-            this.room.onStateChange.once((state) => {
-                this.physics.world.setBounds(0, 0, state.mapWidth, state.mapHeight);
+                this.room.onStateChange.once((state) => {
+                    this.physics.world.setBounds(0, 0, state.mapWidth, state.mapHeight);
 
-                // Draw a border around the world's bounds
-                const borderWidth = 2;
-                const graphics = this.add.graphics();
-                graphics.lineStyle(borderWidth, 0xffffff, 1);
-                graphics.strokeRect(0, 0, state.mapWidth, state.mapHeight);
+                    // Draw a border around the world's bounds
+                    const borderWidth = 2;
+                    const graphics = this.add.graphics();
+                    graphics.lineStyle(borderWidth, 0xffffff, 1);
+                    graphics.strokeRect(0, 0, state.mapWidth, state.mapHeight);
 
-                // Set the camera bounds to be slightly larger than the world bounds
-                const cameraPadding = 50;
-                this.cameras.main.setBounds(-cameraPadding, -cameraPadding, state.mapWidth + 2 * cameraPadding, state.mapHeight + 2 * cameraPadding);
-            });
+                    // Set the camera bounds to be slightly larger than the world bounds
+                    const cameraPadding = 50;
+                    this.cameras.main.setBounds(-cameraPadding, -cameraPadding, state.mapWidth + 2 * cameraPadding, state.mapHeight + 2 * cameraPadding);
+                });
 
-        } catch (e) {
-            console.error(e);
-            // couldn't connect
-            connectionStatusText.text =  "Could not connect with the server.";
+                // If we reach this point, the connection was successful, so we break out of the loop
+                break;
+
+            } catch (e) {
+                console.error(e);
+                // couldn't connect
+                connectionStatusText.text =  `Attempt ${i + 1} pending. Retrying...`;
+
+                // If we've reached the maximum number of retries, we give up
+                if (i === maxRetries - 1) {
+                    connectionStatusText.text = "Could not connect with the server.";
+                }
+            }
         }
-
     }
 
     update(time: number, delta: number): void {
         // skip loop if not connected yet.
-        if (!this.currentPlayer) { return; }
+        // if (!this.currentPlayer) { return; }
+        if (!this.room || this.room.connection.isOpen !== true) { return; }
 
         this.elapsedTime += delta;
         while (this.elapsedTime >= this.fixedTimeStep) {
