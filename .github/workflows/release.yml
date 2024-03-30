@@ -61,7 +61,7 @@ jobs:
         export_default_credentials: true
 
     - name: Delete old files in GCS
-      run: gsutil -m rm -f gs://${{ secrets.GCS_BUCKET_NAME }}/**
+      run: gsutil -m rm gs://${{ secrets.GCS_BUCKET_NAME }}/** || true
       env:
         GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
 
